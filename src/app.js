@@ -13,16 +13,16 @@ app.use(compression());
 // init db
 require('./dbs/init.mongodb');
 
-const { checkOverload } = require('./helpers/check.connect');
+// const { checkOverload } = require('./helpers/check.connect');
 // checkOverload();
 // init routes
 
-app.get('/', (req, res, next) => {
-  return res.status(200).json({
+app.get('/', (req, res, next) =>
+  res.status(200).json({
     status: 'success',
     message: 'Hello world!!!',
-  });
-});
+  }),
+);
 
 // handling error
 

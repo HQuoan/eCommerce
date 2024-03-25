@@ -1,14 +1,15 @@
 const express = require('express');
+const { route } = require('./access');
+const { apiKey, isPermission } = require('../auth/checkAuth');
 
 const router = express.Router();
 
-router.use('/v1/api', require('./access'));
+// check apiKey
+router.use(apiKey);
 
-// router.get('/', (req, res, next) =>
-//   res.status(200).json({
-//     status: 'success',
-//     message: 'Hello world!!!',
-//   }),
-// );
+// check permission
+router.use(isPermission('0000'));
+
+router.use('/v1/api', require('./access'));
 
 module.exports = router;

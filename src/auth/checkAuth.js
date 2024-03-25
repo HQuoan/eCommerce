@@ -34,7 +34,7 @@ const isPermission = (permission) => (req, res, next) => {
     });
   }
 
-  console.log('permission::', req.objKey.permissions);
+  // console.log('permission::', req.objKey.permissions);
   const validPermission = req.objKey.permissions.includes(permission);
   if (!validPermission) {
     return res.status(403).json({
@@ -45,7 +45,10 @@ const isPermission = (permission) => (req, res, next) => {
   return next();
 };
 
+const asyncHandler = (fn) => (req, res, next) => fn(req, res, next).catch(next);
+
 module.exports = {
   apiKey,
   isPermission,
+  asyncHandler,
 };

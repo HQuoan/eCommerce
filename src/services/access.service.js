@@ -17,45 +17,30 @@ const RoleShop = {
 };
 
 class AccessService {
-  static async handlerRefreshToken(refreshToken) {
-    const foundToken =
-      await KeyTokenService.findByRefreshTokenUsed(refreshToken);
+  static async handlerRefreshToken({ user, refreshToken, keyStore }) {
+    const { userId, email } = user;
 
-    if (foundToken) {
-      const { userId, email } = await verifyJWT(
-        refreshToken,
-        foundToken.privateKey,
-      );
-      console.log({ userId, email });
-
-      //xoa tat ca token trong keyStore
+    if (keyStore.refreshTokensUsed.includes(refreshToken)) {
       await KeyTokenService.deleteKeyById(userId);
       throw new BadRequestError('Something wrong happened!! Please relogin');
     }
 
-    // No , Ok
-    const holderToken = await KeyTokenService.findByRefreshToken(refreshToken);
+    if (keyStore.refreshToken !== refreshToken) {
+      throw new AuthFailureError('Shop not registered');
+    }
 
-    if (!holderToken) throw new AuthFailureError('Shop not registered');
-
-    const { userId, email } = await verifyJWT(
-      refreshToken,
-      holderToken.privateKey,
-    );
-    console.log('2----', { userId, email });
-    // check userId
     const foundShop = await findByEmail({ email });
     if (!foundShop) throw new AuthFailureError('Shop not registered');
 
     /// create 1 cap token moi
     const tokens = await createTokenPair(
       { userId, email },
-      holderToken.publicKey,
-      holderToken.privateKey,
+      keyStore.publicKey,
+      keyStore.privateKey,
     );
 
     // update token
-    await holderToken.updateOne({
+    await keyStore.updateOne({
       $set: {
         refreshToken: tokens.refreshToken,
       },
@@ -65,7 +50,7 @@ class AccessService {
     });
 
     return {
-      user: { userId, email },
+      user,
       tokens,
     };
   }

@@ -8,6 +8,7 @@ const HEADER = {
   API_KEY: 'x-api-key',
   CLIENT_ID: 'x-client-id',
   AUTHORIZATION: 'authorization',
+  REFRESHTOKEN: 'x-rtoken-id',
 };
 
 const verifyJWT = async (token, keySecret) =>
@@ -46,16 +47,32 @@ const authentication = asyncHandler(async (req, res, next) => {
     5 - check keyStore with this userId;
     6 - Oke all => return next()
   */
-
   const userId = req.headers[HEADER.CLIENT_ID];
   if (!userId) throw new AuthFailureError('Invalid Request');
 
   //2
-  console.log('userid:::', userId);
   const keyStore = await findByUserId(userId);
   if (!keyStore) throw new NotFoundError('Not found keyStore');
 
   //3
+  const refreshToken = req.headers[HEADER.REFRESHTOKEN];
+  if (refreshToken) {
+    // eslint-disable-next-line no-useless-catch
+    try {
+      const decodeUser = await verifyJWT(refreshToken, keyStore.privateKey);
+
+      if (userId !== decodeUser.userId)
+        throw new AuthFailureError('Invalid userId');
+      req.keyStore = keyStore;
+      req.user = decodeUser;
+      req.refreshToken = refreshToken;
+
+      return next();
+    } catch (error) {
+      throw error;
+    }
+  }
+
   const accessToken = req.headers[HEADER.AUTHORIZATION];
   if (!accessToken) throw new AuthFailureError('Invalid Request');
 

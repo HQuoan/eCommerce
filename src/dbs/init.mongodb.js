@@ -20,6 +20,9 @@ class Database {
       mongoose.set('debug', true);
       mongoose.set('debug', { color: true });
     }
+    // if phia tren de biet ket qua cua cac req den db, vi du
+    //     Mongoose: Shops.createIndex({ email: 1 }, { unique: true, background: true })
+    // Mongoose: Apikeys.createIndex({ key: 1 }, { unique: true, background: true })
 
     mongoose
       .connect(connectString, {
@@ -36,7 +39,6 @@ class Database {
     if (!Database.instance) {
       Database.instance = new Database();
     }
-
     return Database.instance;
   }
 }

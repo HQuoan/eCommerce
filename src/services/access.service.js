@@ -6,7 +6,8 @@ const shopModel = require('../models/shop.model');
 const KeyTokenService = require('./keyToken.service');
 const { createTokenPair } = require('../auth/authUtils');
 const { getInfoData } = require('../utils');
-const { BadRequestError } = require('../core/error.response');
+const { BadRequestError, AuthFailureError } = require('../core/error.response');
+const { findByEmail } = require('./shop.service');
 
 const RoleShop = {
   SHOP: 'SHOP',
@@ -16,6 +17,50 @@ const RoleShop = {
 };
 
 class AccessService {
+  static async logout(keyStore) {
+    const delKey = await KeyTokenService.removeKeyById(keyStore._id);
+    console.log({ delKey });
+    return delKey;
+  }
+
+  static async login({ email, password, refreshToken = null }) {
+    // 1 - check email in dbs
+    const foundShop = await findByEmail({ email });
+    if (!foundShop) throw new BadRequestError('Shop no registered');
+
+    // 2 - match password
+    const match = bcrypt.compare(password, foundShop.password);
+    if (!match) throw new AuthFailureError('Authentication error');
+
+    // 3 - create AT vs RT and save
+    // created privateKey, publicKey
+    const privateKey = crypto.randomBytes(64).toString('hex');
+    const publicKey = crypto.randomBytes(64).toString('hex');
+
+    // 4 - generate tokens
+    const { _id: userId } = foundShop;
+    const tokens = await createTokenPair(
+      { userId, email },
+      publicKey,
+      privateKey,
+    );
+
+    await KeyTokenService.createKeyToken({
+      userId,
+      privateKey,
+      publicKey,
+      refreshToken: tokens.refreshToken,
+    });
+
+    return {
+      shop: getInfoData({
+        fields: ['_id', 'name', 'email'],
+        object: foundShop,
+      }),
+      tokens,
+    };
+  }
+
   static async signUp({ name, email, password }) {
     // try {
     // Step1: check email exists??
@@ -81,13 +126,6 @@ class AccessService {
       code: 200,
       metadata: null,
     };
-    // } catch (error) {
-    //   return {
-    //     code: 'xxx',
-    //     message: error.message,
-    //     status: 'error',
-    //   };
-    // }
   }
 }
 

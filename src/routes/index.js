@@ -1,5 +1,4 @@
 const express = require('express');
-const { route } = require('./access');
 const { apiKey, isPermission } = require('../auth/checkAuth');
 
 const router = express.Router();

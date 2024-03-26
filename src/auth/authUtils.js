@@ -10,6 +10,9 @@ const HEADER = {
   AUTHORIZATION: 'authorization',
 };
 
+const verifyJWT = async (token, keySecret) =>
+  await JWT.verify(token, keySecret);
+
 const createTokenPair = async (payload, publicKey, privateKey) => {
   try {
     const accessToken = await JWT.sign(payload, publicKey, {
@@ -58,7 +61,7 @@ const authentication = asyncHandler(async (req, res, next) => {
 
   // eslint-disable-next-line no-useless-catch
   try {
-    const decodeUser = JWT.verify(accessToken, keyStore.publicKey);
+    const decodeUser = await verifyJWT(accessToken, keyStore.publicKey);
     if (userId !== decodeUser.userId)
       throw new AuthFailureError('Invalid userId');
     req.keyStore = keyStore;
@@ -71,4 +74,5 @@ const authentication = asyncHandler(async (req, res, next) => {
 module.exports = {
   createTokenPair,
   authentication,
+  verifyJWT,
 };

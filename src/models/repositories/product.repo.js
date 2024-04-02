@@ -1,6 +1,7 @@
 /* eslint-disable camelcase */
 const { Types } = require('mongoose');
 const { product, electronic, clothing } = require('../../models/product.model');
+const { getSelectData, unGetSelectData } = require('../../utils');
 
 const queryProduct = async ({ query, limit, skip }) =>
   await product
@@ -66,10 +67,29 @@ const unPublicProductByShop = async ({ product_shop, product_id }) => {
   return modifiedCount;
 };
 
+const findAllProducts = async ({ limit, sort, page, filter, select }) => {
+  const skip = (page - 1) * limit;
+  const sortBy = sort === 'ctime' ? { _id: -1 } : { _id: 1 };
+  const products = await product
+    .find(filter)
+    .sort(sortBy)
+    .skip(skip)
+    .limit(limit)
+    .select(getSelectData(select))
+    .lean();
+
+  return products;
+};
+
+const findProduct = async ({ product_id, unSelect }) =>
+  await product.findById(product_id).select(unGetSelectData(unSelect));
+
 module.exports = {
   findAllDraftsForShop,
   publishProductByShop,
   unPublicProductByShop,
   findAllPublishForShop,
   searchProductByUser,
+  findAllProducts,
+  findProduct,
 };

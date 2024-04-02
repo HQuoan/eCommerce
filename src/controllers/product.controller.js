@@ -12,6 +12,52 @@ class ProductController {
       }),
     }).send(res);
   }
+
+  async publicProductByShop(req, res, next) {
+    return new SuccessResponse({
+      message: 'publicProductByShop success!',
+      metadata: await ProductServiceV2.publishProductByShop({
+        product_id: req.params.id,
+        product_shop: req.user.userId,
+      }),
+    }).send(res);
+  }
+
+  async unPublicProductByShop(req, res, next) {
+    return new SuccessResponse({
+      message: 'unPublicProductByShop success!',
+      metadata: await ProductServiceV2.unPublicProductByShop({
+        product_id: req.params.id,
+        product_shop: req.user.userId,
+      }),
+    }).send(res);
+  }
+
+  /// QUERY //
+  async getAllDraftsForShop(req, res, next) {
+    return new SuccessResponse({
+      message: 'Get list Draft success!',
+      metadata: await ProductServiceV2.findAllDraftsForShop({
+        product_shop: req.user.userId,
+      }),
+    }).send(res);
+  }
+
+  async getAllPublishForShop(req, res, next) {
+    return new SuccessResponse({
+      message: 'Get list Publish success!',
+      metadata: await ProductServiceV2.findAllPublishForShop({
+        product_shop: req.user.userId,
+      }),
+    }).send(res);
+  }
+
+  async getListSearchProduct(req, res, next) {
+    return new SuccessResponse({
+      message: 'Get list search product success!',
+      metadata: await ProductServiceV2.searchProduct(req.params),
+    }).send(res);
+  }
 }
 
 module.exports = new ProductController();

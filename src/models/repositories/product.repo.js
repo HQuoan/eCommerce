@@ -84,6 +84,16 @@ const findAllProducts = async ({ limit, sort, page, filter, select }) => {
 const findProduct = async ({ product_id, unSelect }) =>
   await product.findById(product_id).select(unGetSelectData(unSelect));
 
+const updateProductById = async ({
+  productId,
+  bodyUpdate,
+  model,
+  isNew = true,
+}) =>
+  await model.findByIdAndUpdate(productId, bodyUpdate, {
+    new: isNew,
+  });
+
 module.exports = {
   findAllDraftsForShop,
   publishProductByShop,
@@ -92,4 +102,5 @@ module.exports = {
   searchProductByUser,
   findAllProducts,
   findProduct,
+  updateProductById,
 };

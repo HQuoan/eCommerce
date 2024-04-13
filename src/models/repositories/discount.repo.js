@@ -42,7 +42,11 @@ const findAllDiscountCodesUnselect = async ({
   return documents;
 };
 
+const checkDiscountExists = async ({ model, filter }) =>
+  model.findOne(filter).lean();
+
 module.exports = {
   findAllDiscountCodesSelect,
   findAllDiscountCodesUnselect,
+  checkDiscountExists,
 };

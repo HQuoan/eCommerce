@@ -12,6 +12,7 @@ const discountSchema = new Schema(
     discount_code: { type: String, required: true },
     discount_start_date: { type: Date, required: true }, // ngay bat dau
     discount_end_date: { type: Date, required: true }, // ngay ket thuc
+    discount_max_value: { type: Number, require: true },
     discount_max_uses: { type: Number, require: true }, // so luong discount duoc ap dung
     discount_used_count: { type: Number, require: true }, // so luong discount da su dung
     discount_users_used: { type: Array, default: [] }, // ai da dung

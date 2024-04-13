@@ -1,5 +1,8 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 const _ = require('lodash');
+const { Types } = require('mongoose');
+
+const convertToObjectIdMongoDb = (id) => Types.ObjectId(id);
 
 const getInfoData = ({ fields = [], object = {} }) => _.pick(object, fields);
 
@@ -41,4 +44,5 @@ module.exports = {
   unGetSelectData,
   removeUndefinedObject,
   updateNestedObjectParser,
+  convertToObjectIdMongoDb,
 };
